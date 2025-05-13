@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>栄養カロリー計算ソフト</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4faff;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #0077cc;
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .category {
+      flex: 1;
+      min-width: 250px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .category h2 {
+      text-align: center;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+    }
+    .card {
+      margin-bottom: 15px;
+    }
+    .card label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .card input {
+      width: 100%;
+      padding: 5px;
+      font-size: 16px;
+    }
+    .result {
+      font-size: 14px;
+      margin-top: 5px;
+      background: #eef;
+      padding: 5px;
+      border-radius: 6px;
+    }
+    .summary, .warning, #target {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+    .warning {
+      color: red;
+      font-weight: bold;
+      white-space: pre-line;
+    }
+    .controls {
+      max-width: 500px;
+      margin: 0 auto 20px;
+      text-align: center;
+    }
+    .controls select {
+      padding: 8px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🍱 栄養カロリー計算ソフト</h1>
+
+  <div class="controls">
+    <label for="userSelect">🎯 PFC目標を選択:</label>
+    <select id="userSelect">
+      <option value="">選択してください</option>
+    </select>
+  </div>
+
+  <!-- 🎯 目標表示エリア -->
+  <div id="target">🎯 目標摂取カロリー: 0 kcal｜P: 0 g｜F: 0 g｜C: 0 g</div>
+
+  <div class="grid">
+    <div class="category">
+      <h2>主食</h2>
+      <div class="card"><label>お米</label><input type="number" data-name="お米" data-cal="1.68" data-p="0.026" data-f="0.003" data-c="0.37"></div>
+      <div class="card"><label>小麦粉</label><input type="number" data-name="小麦粉" data-cal="3.64" data-p="0.1" data-f="0.01" data-c="0.76"></div>
+      <div class="card"><label>そば</label><input type="number" data-name="そば" data-cal="1.3" data-p="0.04" data-f="0.01" data-c="0.27"></div>
+      <div class="card"><label>うどん</label><input type="number" data-name="うどん" data-cal="1.05" data-p="0.02" data-f="0.003" data-c="0.21"></div>
+    </div>
+
+    <div class="category">
+      <h2>肉・魚</h2>
+      <div class="card"><label>鶏むね肉</label><input type="number" data-name="鶏むね肉" data-cal="1.65" data-p="0.2" data-f="0.03" data-c="0.0"></div>
+      <div class="card"><label>牛肉</label><input type="number" data-name="牛肉" data-cal="2.9" data-p="0.15" data-f="0.23" data-c="0.0"></div>
+      <div class="card"><label>鮭</label><input type="number" data-name="鮭" data-cal="2.0" data-p="0.22" data-f="0.1" data-c="0.0"></div>
+    </div>
+
+    <div class="category">
+      <h2>油</h2>
+      <div class="card"><label>オリーブオイル</label><input type="number" data-name="オリーブオイル" data-cal="9.0" data-p="0.0" data-f="1.0" data-c="0.0"></div>
+    </div>
+  </div>
+
+  <div class="summary" id="summary">
+    ✅ 総摂取カロリー: 0 kcal｜P: 0 g｜F: 0 g｜C: 0 g
+  </div>
+  <div class="warning" id="warning"></div>
+
+  <script>
+    let targets = { protein: 120, fat: 50, carb: 200 };
+
+    function updateSummary() {
+      let totalCal = 0, totalP = 0, totalF = 0, totalC = 0;
+
+      document.querySelectorAll('.card').forEach(card => {
+        const input = card.querySelector('input');
+        const result = card.querySelector('.result') || (() => {
+          const r = document.createElement("div");
+          r.className = "result";
+          card.appendChild(r);
+          return r;
+        })();
+        const gram = parseFloat(input.value) || 0;
+        const cal = parseFloat(input.dataset.cal);
+        const p = parseFloat(input.dataset.p);
+        const f = parseFloat(input.dataset.f);
+        const c = parseFloat(input.dataset.c);
+
+        const kcal = gram * cal;
+        const prot = gram * p;
+        const fat = gram * f;
+        const carb = gram * c;
+
+        result.textContent = `この品目: ${kcal.toFixed(2)} kcal｜P: ${prot.toFixed(2)}｜F: ${fat.toFixed(2)}｜C: ${carb.toFixed(2)}`;
+
+        totalCal += kcal;
+        totalP += prot;
+        totalF += fat;
+        totalC += carb;
+      });
+
+      document.getElementById("summary").textContent =
+        `✅ 総摂取カロリー: ${totalCal.toFixed(2)} kcal｜P: ${totalP.toFixed(2)} g｜F: ${totalF.toFixed(2)} g｜C: ${totalC.toFixed(2)} g`;
+
+      let warning = "";
+      if (totalP > targets.protein) warning += `⚠ タンパク質が ${(totalP - targets.protein).toFixed(2)} g オーバー\n`;
+      if (totalF > targets.fat) warning += `⚠ 脂質が ${(totalF - targets.fat).toFixed(2)} g オーバー\n`;
+      if (totalC > targets.carb) warning += `⚠ 炭水化物が ${(totalC - targets.carb).toFixed(2)} g オーバー`;
+
+      document.getElementById("warning").textContent = warning;
+    }
+
+    function updateUserSelect() {
+      const users = JSON.parse(localStorage.getItem("pfcAllUsers") || "{}");
+      const select = document.getElementById("userSelect");
+      Object.keys(users).forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+      });
+    }
+
+    document.getElementById("userSelect").addEventListener("change", function () {
+      const selected = this.value;
+      const users = JSON.parse(localStorage.getItem("pfcAllUsers") || "{}");
+      if (users[selected]) {
+        const d = users[selected];
+        targets.protein = d.proteinAvg;
+        targets.fat = d.fatGram;
+        targets.carb = d.carbGram;
+
+        document.getElementById("target").textContent =
+          `🎯 目標摂取カロリー: ${d.intake.toFixed(2)} kcal｜P: ${d.proteinAvg.toFixed(2)} g｜F: ${d.fatGram.toFixed(2)} g｜C: ${d.carbGram.toFixed(2)} g`;
+
+        updateSummary();
+        alert(`🎯 ${selected} さんの目標値に設定されました！`);
+      }
+    });
+
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+      input.addEventListener("input", updateSummary);
+    });
+
+    updateUserSelect();
+    updateSummary();
+  </script>
+
+</body>
+</html>
